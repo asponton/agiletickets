@@ -64,24 +64,23 @@ public class EspetaculosController {
 	@Post @Path("/sessao/{sessaoId}/reserva")
 	public void reserva(Long sessaoId, final Integer quantidade) {
 		Sessao sessao = agenda.sessao(sessaoId);
+		
 		if (sessao == null) {
 			result.notFound();
 			return;
 		}
 
 		this.validaLugar(quantidade, sessao);
-
 		validator.onErrorRedirectTo(this).sessao(sessao.getId());
 
 		sessao.reserva(quantidade);
 		result.include("message", "Sessao reservada com sucesso");
-
 		result.redirectTo(IndexController.class).index();
 	}
 
 	@Get @Path("/espetaculo/{espetaculoId}/sessoes")
 	public void sessoes(Long espetaculoId) {
-		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
+		Espetaculo espetaculo = this.carregaEspetaculo(espetaculoId);
 
 		result.include("espetaculo", espetaculo);
 	}
