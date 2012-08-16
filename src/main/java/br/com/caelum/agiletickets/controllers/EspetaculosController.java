@@ -46,7 +46,6 @@ public class EspetaculosController {
 	public void adiciona(Espetaculo espetaculo) {
 		this.validarEspetaculo(espetaculo);
 		validator.onErrorRedirectTo(this).lista();
-
 		agenda.cadastra(espetaculo);
 		result.redirectTo(this).lista();
 	}
@@ -57,22 +56,18 @@ public class EspetaculosController {
 		if (sessao == null) {
 			result.notFound();
 		}
-
 		result.include("sessao", sessao);
 	}
 
 	@Post @Path("/sessao/{sessaoId}/reserva")
 	public void reserva(Long sessaoId, final Integer quantidade) {
 		Sessao sessao = agenda.sessao(sessaoId);
-		
 		if (sessao == null) {
 			result.notFound();
 			return;
 		}
-
 		this.validaLugar(quantidade, sessao);
 		validator.onErrorRedirectTo(this).sessao(sessao.getId());
-
 		sessao.reserva(quantidade);
 		result.include("message", "Sessao reservada com sucesso");
 		result.redirectTo(IndexController.class).index();
@@ -81,7 +76,6 @@ public class EspetaculosController {
 	@Get @Path("/espetaculo/{espetaculoId}/sessoes")
 	public void sessoes(Long espetaculoId) {
 		Espetaculo espetaculo = this.carregaEspetaculo(espetaculoId);
-
 		result.include("espetaculo", espetaculo);
 	}
 
@@ -89,11 +83,8 @@ public class EspetaculosController {
 	@Post @Path("/espetaculo/{espetaculoId}/sessoes")
 	public void cadastraSessoes(Long espetaculoId, LocalDate inicio, LocalDate fim, LocalTime horario, Periodicidade periodicidade) {
 		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
-
 		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
-
 		agenda.agende(sessoes);
-
 		result.include("message", sessoes.size() + " sessoes criadas com sucesso");
 		result.redirectTo(this).lista();
 	}
@@ -120,7 +111,6 @@ public class EspetaculosController {
 		if (sessao.isLugarValido(quantidade)) {
 			validator.add(new ValidationMessage("Você deve escolher um lugar ou mais", ""));
 		}
-
 		if (!sessao.podeReservar(quantidade)) {
 			validator.add(new ValidationMessage("Não existem ingressos disponíveis", ""));
 		}
