@@ -20,8 +20,6 @@ import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
 import br.com.caelum.vraptor.validator.ValidationMessage;
 
-import com.google.common.base.Strings;
-
 @Resource
 public class EspetaculosController {
 
@@ -46,18 +44,12 @@ public class EspetaculosController {
 
 	@Post @Path("/espetaculos")
 	public void adiciona(Espetaculo espetaculo) {
-		if (Strings.isNullOrEmpty(espetaculo.getNome())) {
-			validator.add(new ValidationMessage("Nome do espetáculo não pode estar em branco", ""));
-		}
-		if (Strings.isNullOrEmpty(espetaculo.getDescricao())) {
-			validator.add(new ValidationMessage("Descrição do espetáculo não pode estar em branco", ""));
-		}
+		this.validarEspetaculo(espetaculo);
 		validator.onErrorRedirectTo(this).lista();
 
 		agenda.cadastra(espetaculo);
 		result.redirectTo(this).lista();
 	}
-
 
 	@Get @Path("/sessao/{id}")
 	public void sessao(Long id) {
@@ -77,13 +69,7 @@ public class EspetaculosController {
 			return;
 		}
 
-		if (quantidade < 1) {
-			validator.add(new ValidationMessage("Você deve escolher um lugar ou mais", ""));
-		}
-
-		if (!sessao.podeReservar(quantidade)) {
-			validator.add(new ValidationMessage("Não existem ingressos disponíveis", ""));
-		}
+		this.validaLugar(quantidade, sessao);
 
 		validator.onErrorRedirectTo(this).sessao(sessao.getId());
 
@@ -120,6 +106,25 @@ public class EspetaculosController {
 		}
 		validator.onErrorUse(status()).notFound();
 		return espetaculo;
+	}
+	
+	private void validarEspetaculo(Espetaculo espetaculo) {
+		if (espetaculo.isNomeValido()) {
+			validator.add(new ValidationMessage("Nome do espetáculo não pode estar em branco", ""));
+		}
+		if (espetaculo.isDescricaoValida()) {
+			validator.add(new ValidationMessage("Descrição do espetáculo não pode estar em branco", ""));
+		}
+	}
+
+	private void validaLugar(final Integer quantidade, Sessao sessao) {
+		if (sessao.isLugarValido(quantidade)) {
+			validator.add(new ValidationMessage("Você deve escolher um lugar ou mais", ""));
+		}
+
+		if (!sessao.podeReservar(quantidade)) {
+			validator.add(new ValidationMessage("Não existem ingressos disponíveis", ""));
+		}
 	}
 
 }
